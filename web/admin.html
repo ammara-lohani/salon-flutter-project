@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --sidebar-bg: #f8f9fa;
+            --border-color: #e9ecef;
+            --card-bg: #ffffff;
+            --card-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --hover-bg: #e9ecef;
+            --primary-color: #007bff;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --sidebar-bg: #2d2d2d;
+            --border-color: #404040;
+            --card-bg: #2d2d2d;
+            --card-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            --hover-bg: #404040;
+            --primary-color: #0d6efd;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: var(--sidebar-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .menu-button {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .menu-button:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-container {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, #ff91a4 0%, #ff6b85 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 4px;
+        }
+
+        .logo-container img:not([src]), 
+        .logo-container img[src=""] {
+            display: none;
+        }
+
+        .logo-fallback {
+            font-size: 16px;
+            color: white;
+            font-weight: bold;
+            display: none;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            width: 250px;
+            height: calc(100vh - 60px);
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            transition: all 0.3s ease;
+            transform: translateX(0);
+        }
+
+        .sidebar.closed {
+            transform: translateX(-100%);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background-color: var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background-color: var(--primary-color);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(26px);
+        }
+
+        .menu {
+            list-style: none;
+        }
+
+        .menu-item {
+            margin-bottom: 10px;
+        }
+
+        .menu-item button {
+            width: 100%;
+            padding: 12px 16px;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            text-align: left;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .menu-item button:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .menu-item button.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .main-content {
+            margin-top: 60px;
+            margin-left: 250px;
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .main-content.expanded {
+            margin-left: 0;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .section-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .profile-info {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            max-width: 400px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .profile-field {
+            margin-bottom: 16px;
+        }
+
+        .profile-label {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-color);
+        }
+
+        .profile-value {
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .appointments-placeholder {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <button class="menu-button" id="menuButton">☰</button>
+            <div class="logo-container">
+                <img src="LaCigal-Logo.png" alt="LaCigal Logo" id="logoImg">
+                <div class="logo-fallback" id="logoFallback">LC</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="theme-toggle">
+                <div class="toggle-switch" id="themeToggle">
+                    <div class="toggle-slider"></div>
+                </div>
+            </div>
+            <button class="logout-btn" id="logoutBtn">Logout</button>
+        </div>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <ul class="menu">
+            <li class="menu-item">
+                <button id="profileBtn">Profile</button>
+            </li>
+            <li class="menu-item">
+                <button id="servicesBtn" class="active">Services</button>
+            </li>
+            <li class="menu-item">
+                <button id="categoriesBtn">Categories</button>
+            </li>
+            <li class="menu-item">
+                <button id="appointmentsBtn">Appointments</button>
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content" id="mainContent">
+        <div id="profileSection" class="section">
+            <h2 class="section-title">Profile</h2>
+            <div class="profile-info">
+                <div class="profile-field">
+                    <div class="profile-label">Name</div>
+                    <div class="profile-value" id="profileName">
+                        <div class="loading"></div>
+                    </div>
+                </div>
+                <div class="profile-field">
+                    <div class="profile-label">Email</div>
+                    <div class="profile-value" id="profileEmail">
+                        <div class="loading"></div>
+                    </div>
+                </div>
+                <div class="profile-field">
+                    <div class="profile-label">User ID</div>
+                    <div class="profile-value" id="profileUserId">
+                        <div class="loading"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="servicesSection" class="section active">
+            <iframe src="services.html" 
+                    style="width: 100%; height: calc(100vh - 120px); border: none; border-radius: 8px;"
+                    frameborder="0">
+            </iframe>
+        </div>
+
+        <div id="categoriesSection" class="section">
+            <iframe src="catgorie.html" 
+                    style="width: 100%; height: calc(100vh - 120px); border: none; border-radius: 8px;"
+                    frameborder="0">
+            </iframe>
+        </div>
+
+        <!--appointments ( file )-->
+        <div id="appointmentsSection" class="section">
+            <iframe src="booking.html" 
+                    style="width: 100%; height: calc(100vh - 120px); border: none; border-radius: 8px;"
+                    frameborder="0">
+            </iframe>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { 
+            getAuth, 
+            onAuthStateChanged,
+            signOut
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3PTQ7XDWTDxGB36H2kmpX0XhZ_BQ_1Tc",
+            authDomain: "file-bbe58.firebaseapp.com",
+            projectId: "file-bbe58",
+            storageBucket: "file-bbe58.firebasestorage.app",
+            messagingSenderId: "525008744146",
+            appId: "1:525008744146:web:ca060e061804692f8fc70b",
+            measurementId: "G-DYMNQ2V0RW"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // DOM elements
+        const profileName = document.getElementById('profileName');
+        const profileEmail = document.getElementById('profileEmail');
+        const profileUserId = document.getElementById('profileUserId');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        // Logo fallback handling
+        const logoImg = document.getElementById('logoImg');
+        const logoFallback = document.getElementById('logoFallback');
+        
+        if (logoImg) {
+            logoImg.onerror = function() {
+                this.style.display = 'none';
+                logoFallback.style.display = 'block';
+            };
+            
+            logoImg.onload = function() {
+                logoFallback.style.display = 'none';
+            };
+        }
+
+        // Update profile information
+        function updateProfile(user) {
+            profileName.textContent = user.displayName || 'Not set';
+            profileEmail.textContent = user.email || 'Not available';
+            profileUserId.textContent = user.uid || 'Not available';
+        }
+
+        // Auth state observer
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in
+                console.log('✅ User authenticated:', user.email);
+                updateProfile(user);
+            } else {
+                // User is signed out - redirect to login
+                console.log('❌ User not authenticated, redirecting to login');
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Logout functionality
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                console.log('✅ User signed out successfully');
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('❌ Error signing out:', error);
+            }
+        });
+
+        // Menu toggle functionality
+        const menuButton = document.getElementById('menuButton');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+
+        menuButton.addEventListener('click', () => {
+            console.log('Menu button clicked');
+            sidebar.classList.toggle('closed');
+            mainContent.classList.toggle('expanded');
+        });
+
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        // Load saved theme preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            body.setAttribute('data-theme', 'dark');
+            themeToggle.classList.add('active');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            themeToggle.classList.toggle('active');
+            
+            if (themeToggle.classList.contains('active')) {
+                body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Menu functionality
+        const menuButtons = document.querySelectorAll('.menu-item button');
+        const sections = document.querySelectorAll('.section');
+
+        menuButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons
+                menuButtons.forEach(btn => btn.classList.remove('active'));
+                // Add active class to clicked button
+                button.classList.add('active');
+
+                // Hide all sections
+                sections.forEach(section => section.classList.remove('active'));
+
+                // Show corresponding section
+                if (button.id === 'profileBtn') {
+                    document.getElementById('profileSection').classList.add('active');
+                } else if (button.id === 'servicesBtn') {
+                    document.getElementById('servicesSection').classList.add('active');
+                } else if (button.id === 'categoriesBtn') {
+                    document.getElementById('categoriesSection').classList.add('active');
+                } else if (button.id === 'appointmentsBtn') {
+                    document.getElementById('appointmentsSection').classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

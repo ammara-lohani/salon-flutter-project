@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --sidebar-bg: #f8f9fa;
+            --border-color: #e9ecef;
+            --card-bg: #ffffff;
+            --card-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --hover-bg: #e9ecef;
+            --primary-color: #007bff;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --sidebar-bg: #2d2d2d;
+            --border-color: #404040;
+            --card-bg: #2d2d2d;
+            --card-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            --hover-bg: #404040;
+            --primary-color: #0d6efd;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .deals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .deal-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .deal-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .deal-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background-color: var(--hover-bg);
+        }
+
+        .deal-content {
+            padding: 20px;
+        }
+
+        .deal-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+
+        .deal-description {
+            color: var(--text-color);
+            opacity: 0.7;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .deal-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        .close-btn:hover {
+            opacity: 1;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .image-preview {
+            margin-top: 10px;
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-color);
+            opacity: 0.6;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 6px;
+            color: white;
+            font-weight: 500;
+            z-index: 1001;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            background-color: var(--success-color);
+        }
+
+        .toast.error {
+            background-color: var(--danger-color);
+        }
+
+        .security-warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        [data-theme="dark"] .security-warning {
+            background-color: #2d2a1a;
+            border-color: #3d3520;
+            color: #f4d03f;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .deals-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+        
+        <div class="header">
+            <h1 class="page-title">Manage Deals & Discounts</h1>
+            <div>
+                <button class="btn btn-primary" id="addDealBtn">
+                    <span>+</span>
+                    Add New Deal
+                </button>
+            </div>
+        </div>
+
+        <div id="dealsContainer">
+            <div class="deals-grid" id="dealsGrid">
+                <!-- Deals will be loaded here -->
+            </div>
+            
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <div class="empty-state-icon">🎯</div>
+                <h3>No deals found</h3>
+                <p>Start by adding your first deal or discount offer.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Deal Modal -->
+    <div class="modal" id="dealModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Add New Deal</h2>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            
+            <form id="dealForm">
+                <div class="form-group">
+                    <label class="form-label" for="dealName">Deal Name *</label>
+                    <input type="text" class="form-control" id="dealName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="dealImageUrl">Image URL (Optional)</label>
+                    <input type="url" class="form-control" id="dealImageUrl" placeholder="https://example.com/image.jpg">
+                    <img class="image-preview" id="imagePreview" alt="Preview">
+                    <small style="color: var(--text-color); opacity: 0.7; margin-top: 5px; display: block;">
+                        Enter a valid image URL to display an image with your deal
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="dealDescription">Description *</label>
+                    <textarea class="form-control textarea" id="dealDescription" required placeholder="Enter deal description..."></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-success" id="submitBtn">
+                        <div class="loading" id="submitLoading" style="display: none;"></div>
+                        <span id="submitText">Save Deal</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast notifications -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Supabase SDK -->
+    <script type="module">
+        // Import Supabase
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+        // Supabase configuration - Using anon key for testing
+        const SUPABASE_URL = 'https://krasyurpxjwqolqqwsxz.supabase.co';
+        // Use your anon key here
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyYXN5dXJweGp3cW9scXF3c3h6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxNzk4MTEsImV4cCI6MjA2NTc1NTgxMX0.PUd0iJnl9wxgOkslZPxBwAvohVcN2wGefOPaEk-Fklw';
+
+        // Initialize Supabase client with anon key
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // DOM elements
+        const addDealBtn = document.getElementById('addDealBtn');
+        const dealModal = document.getElementById('dealModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const dealForm = document.getElementById('dealForm');
+        const closeModal = document.getElementById('closeModal');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const dealsGrid = document.getElementById('dealsGrid');
+        const emptyState = document.getElementById('emptyState');
+        const dealImageUrl = document.getElementById('dealImageUrl');
+        const imagePreview = document.getElementById('imagePreview');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitLoading = document.getElementById('submitLoading');
+        const submitText = document.getElementById('submitText');
+        const toast = document.getElementById('toast');
+
+        // Theme management
+        function checkParentTheme() {
+            try {
+                const parentTheme = window.parent.document.body.getAttribute('data-theme');
+                if (parentTheme === 'dark') {
+                    document.body.setAttribute('data-theme', 'dark');
+                }
+            } catch (e) {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme === 'dark') {
+                    document.body.setAttribute('data-theme', 'dark');
+                }
+            }
+        }
+
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'themeChange') {
+                if (event.data.theme === 'dark') {
+                    document.body.setAttribute('data-theme', 'dark');
+                } else {
+                    document.body.removeAttribute('data-theme');
+                }
+            }
+        });
+
+        checkParentTheme();
+        let currentDealId = null;
+        let dealsCache = new Map(); // Cache for better performance
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+
+        // Validate and preview image URL
+        function validateImageUrl(url) {
+            return new Promise((resolve) => {
+                if (!url) {
+                    resolve(false);
+                    return;
+                }
+                
+                const img = new Image();
+                img.onload = () => resolve(true);
+                img.onerror = () => resolve(false);
+                img.src = url;
+            });
+        }
+
+        // Image URL preview functionality
+        dealImageUrl.addEventListener('blur', async (e) => {
+            const url = e.target.value.trim();
+            if (url) {
+                const isValid = await validateImageUrl(url);
+                if (isValid) {
+                    imagePreview.src = url;
+                    imagePreview.style.display = 'block';
+                } else {
+                    imagePreview.style.display = 'none';
+                    showToast('Invalid image URL or image could not be loaded', 'error');
+                }
+            } else {
+                imagePreview.style.display = 'none';
+            }
+        });
+
+        // Modal functionality
+        function openModal(deal = null) {
+            if (deal) {
+                modalTitle.textContent = 'Edit Deal';
+                document.getElementById('dealName').value = deal.name;
+                document.getElementById('dealDescription').value = deal.description;
+                document.getElementById('dealImageUrl').value = deal.image || '';
+                currentDealId = deal.id;
+                
+                if (deal.image) {
+                    imagePreview.src = deal.image;
+                    imagePreview.style.display = 'block';
+                }
+                
+                submitText.textContent = 'Update Deal';
+            } else {
+                modalTitle.textContent = 'Add New Deal';
+                dealForm.reset();
+                currentDealId = null;
+                imagePreview.style.display = 'none';
+                submitText.textContent = 'Save Deal';
+            }
+            
+            dealModal.classList.add('active');
+        }
+
+        function closeModalHandler() {
+            dealModal.classList.remove('active');
+            dealForm.reset();
+            imagePreview.style.display = 'none';
+            currentDealId = null;
+        }
+
+        // Event listeners
+        addDealBtn.addEventListener('click', () => openModal());
+        closeModal.addEventListener('click', closeModalHandler);
+        cancelBtn.addEventListener('click', closeModalHandler);
+
+        dealModal.addEventListener('click', (e) => {
+            if (e.target === dealModal) {
+                closeModalHandler();
+            }
+        });
+
+        // Load deals from Supabase with caching
+        async function loadDeals() {
+            try {
+                console.log('Loading deals...');
+                
+                const { data: deals, error } = await supabase
+                    .from('dealsdiscount')
+                    .select('*')
+                    .order('id', { ascending: false });
+
+                if (error) {
+                    throw error;
+                }
+                
+                // Clear cache and grid
+                dealsCache.clear();
+                dealsGrid.innerHTML = '';
+                
+                if (!deals || deals.length === 0) {
+                    emptyState.style.display = 'block';
+                    console.log('No deals found');
+                    return;
+                }
+                
+                emptyState.style.display = 'none';
+                
+                deals.forEach((deal) => {
+                    dealsCache.set(deal.id, deal);
+                    renderDeal(deal);
+                });
+                
+                console.log(`Loaded ${deals.length} deals`);
+            } catch (error) {
+                console.error('Error loading deals:', error);
+                showToast('Error loading deals: ' + error.message, 'error');
+            }
+        }
+
+        // Render deal card
+        function renderDeal(deal) {
+            const dealCard = document.createElement('div');
+            dealCard.className = 'deal-card';
+            
+            const imageUrl = deal.image || 'https://via.placeholder.com/300x200/e9ecef/6c757d?text=No+Image';
+            
+            dealCard.innerHTML = `
+                <img src="${imageUrl}" alt="${deal.name}" class="deal-image" 
+                     onerror="this.src='https://via.placeholder.com/300x200/e9ecef/6c757d?text=No+Image'">
+                <div class="deal-content">
+                    <h3 class="deal-name">${deal.name}</h3>
+                    <p class="deal-description">${deal.description}</p>
+                    <div class="deal-actions">
+                        <button class="btn btn-primary btn-sm edit-btn" data-id="${deal.id}">Edit</button>
+                        <button class="btn btn-danger btn-sm delete-btn" data-id="${deal.id}">Delete</button>
+                    </div>
+                </div>
+            `;
+            
+            dealsGrid.appendChild(dealCard);
+        }
+
+        // Handle form submission
+        dealForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('dealName').value.trim();
+            const description = document.getElementById('dealDescription').value.trim();
+            const imageUrl = document.getElementById('dealImageUrl').value.trim();
+            
+            if (!name || !description) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            // Show loading state
+            submitLoading.style.display = 'inline-block';
+            submitBtn.disabled = true;
+            
+            try {
+                submitText.textContent = currentDealId ? 'Updating deal...' : 'Saving deal...';
+                
+                const dealData = {
+                    name,
+                    description,
+                    image: imageUrl || null
+                };
+                
+                if (currentDealId) {
+                    // Update existing deal
+                    const { data, error } = await supabase
+                        .from('dealsdiscount')
+                        .update(dealData)
+                        .eq('id', currentDealId)
+                        .select();
+
+                    if (error) {
+                        throw error;
+                    }
+
+                    showToast('Deal updated successfully!');
+                    console.log('Deal updated:', currentDealId);
+                } else {
+                    // Create new deal
+                    const { data, error } = await supabase
+                        .from('dealsdiscount')
+                        .insert([dealData])
+                        .select();
+
+                    if (error) {
+                        throw error;
+                    }
+
+                    showToast('Deal added successfully!');
+                    console.log('New deal created:', data[0].id);
+                }
+                
+                closeModalHandler();
+                
+                // Reload deals after a short delay
+                setTimeout(() => {
+                    loadDeals();
+                }, 500);
+                
+            } catch (error) {
+                console.error('Form submission error:', error);
+                showToast(error.message || 'Error saving deal. Please try again.', 'error');
+            } finally {
+                submitLoading.style.display = 'none';
+                submitText.textContent = currentDealId ? 'Update Deal' : 'Save Deal';
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Handle edit and delete actions
+        dealsGrid.addEventListener('click', async (e) => {
+            const dealId = parseInt(e.target.dataset.id);
+            
+            if (e.target.classList.contains('edit-btn')) {
+                try {
+                    // First try to get from cache
+                    let deal = dealsCache.get(dealId);
+                    
+                    if (!deal) {
+                        // If not in cache, fetch from Supabase
+                        const { data, error } = await supabase
+                            .from('dealsdiscount')
+                            .select('*')
+                            .eq('id', dealId)
+                            .single();
+
+                        if (error) {
+                            throw error;
+                        }
+
+                        if (data) {
+                            deal = data;
+                            dealsCache.set(dealId, deal);
+                        }
+                    }
+                    
+                    if (deal) {
+                        openModal(deal);
+                    } else {
+                        showToast('Deal not found', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error loading deal for edit:', error);
+                    showToast('Error loading deal: ' + error.message, 'error');
+                }
+            }
+            
+            if (e.target.classList.contains('delete-btn')) {
+                if (confirm('Are you sure you want to delete this deal? This action cannot be undone.')) {
+                    try {
+                        // Delete record from Supabase
+                        const { error } = await supabase
+                            .from('dealsdiscount')
+                            .delete()
+                            .eq('id', dealId);
+
+                        if (error) {
+                            throw error;
+                        }
+                        
+                        // Remove from cache
+                        dealsCache.delete(dealId);
+                        
+                        showToast('Deal deleted successfully!');
+                        console.log('Deal deleted:', dealId);
+                        
+                        // Reload deals
+                        loadDeals();
+                        
+                    } catch (error) {
+                        console.error('Error deleting deal:', error);
+                        showToast('Error deleting deal: ' + error.message, 'error');
+                    }
+                }
+            }
+        });
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Application initialized with service role key');
+            loadDeals();
+        });
+
+        // Load deals on page load
+        loadDeals();
+    </script>
+</body>
+</html>
