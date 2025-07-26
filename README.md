@@ -9,7 +9,6 @@ A new Flutter project. which allows user to book their appointment check their s
 - Supabase for databse
 - CRUD operation
 - admin can see the appointments
-- admin can see the appointments 
 
 ## Getting Started
 
